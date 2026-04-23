@@ -1,3 +1,4 @@
+from src.services.clients_service import clients_service
 from src.config.connectionPostgres import get_connection
 from src.scripts.eda import load_data
 
@@ -44,3 +45,5 @@ app = FastAPI(
 @app.get("/")
 def read_root() -> dict:
     return {"status": "Project is running", "team": ["Camilo Guengue", "Hector Rios"]}
+
+app.include_router(clients_router, prefix="/clients", tags=["Clients"])

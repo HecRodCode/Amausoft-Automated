@@ -1,7 +1,22 @@
-.idea
-.env
-.venv
-
+# Python bytecode
 __pycache__/
 *.pyc
-data/
+*.pyo
+*.pyd
+
+# Virtual enviroment
+.venv/
+env/
+venv/
+
+# Variables enviroment
+.env
+
+# IDE config file
+.idea/
+.vscode/
+
+# Temporal Data
+*.csv
+logs/
+*.parquet

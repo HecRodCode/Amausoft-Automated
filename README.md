@@ -15,6 +15,18 @@ The project uses a Master/Worker setup with Docker:
 
 ---
 
+## How Run
+1. Clone repo = https://github.com/HecRodCode/Amausoft-Automated.git
+2. And execute the next commands:
+```bash
+# 1. Sync dependencies
+uv sync
+
+# 2. Run FastAPI
+uv run uvicorn main:app --reload
+```
+---
+
 ## Folder Structure
 - `src/`: Everything for the APIs (Routes, Services, Utils).
 
