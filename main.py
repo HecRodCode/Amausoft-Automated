@@ -1,5 +1,9 @@
 from src.config.connectionPostgres import get_connection
 from src.scripts.eda import load_data
+
+from src.scripts.transformation import transform_data
+
+
 from src.utils.downloadKaggle import download_sales_data
 from fastapi import FastAPI
 
@@ -10,8 +14,13 @@ download_sales_data()
 file_path ="data/sales_data_sample.csv"
 df = load_data(file_path)
 
-print("Datos cargados exitosamente:")   
-print(df.head())
+print("Datos cargados exitosamente:")
+transform_data(df)
+
+
+
+
+
 
 # Init FastAPI
 app = FastAPI(
