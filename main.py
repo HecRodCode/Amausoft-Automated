@@ -1,17 +1,26 @@
 from src.config.connectionPostgres import get_connection
+from src.scripts.eda import load_data
+from src.utils.downloadKaggle import download_sales_data
+from fastapi import FastAPI
 
 conn = get_connection()
 print("conexión establecida:", conn)
-
-
-from src.utils.downloadKaggle import download_sales_data
-
 download_sales_data()
-
-
-from src.scripts.eda import load_data
 
 file_path = "data/sales_data.csv"
 df = load_data(file_path)
+
 print("Datos cargados exitosamente:")   
 print(df.head())
+
+# Init FastAPI
+app = FastAPI(
+    title="Amausoft Automated API",
+    description="ETL and Automation project by Camilo & Hector",
+    version="1.0.0"
+)
+
+# Health Check
+@app.get("/")
+def read_root() -> dict:
+    return {"status": "Project is running", "team": ["Camilo Guengue", "Hector Rios"]}

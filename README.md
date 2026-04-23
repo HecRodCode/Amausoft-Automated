@@ -33,7 +33,7 @@ The project uses a Master/Worker setup with Docker:
 - `HTTPX`: To make requests to public APIs.
 - `Apache Airflow`: To run and schedule our DAGs.
 - `Docker`: To run Master and Worker instances.
-- uv`: For fast Python package management.
+- `uv`: For fast Python package management.
 
 ---
 
