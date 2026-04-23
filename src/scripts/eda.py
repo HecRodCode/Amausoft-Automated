@@ -19,3 +19,5 @@ def basic_eda(df):
     print("\nValores nulos por columna:")
     print(df.isnull().sum())
 
+    print("\nRepetidos por ORDERNUMBER:")
+    print(df.duplicated(subset=["ORDERNUMBER"]).sum())

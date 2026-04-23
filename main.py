@@ -1,7 +1,7 @@
 from src.config.connectionPostgres import get_connection
 from src.scripts.eda import load_data
 
-from src.scripts.transformation import transform_data, transform_data_date
+from src.scripts.transformation import transform_data, transform_data_date,transform_data_eliminated_duplicate
 
 from src.scripts.eda import basic_eda
 
@@ -22,6 +22,11 @@ df = transform_data(df)
 basic_eda(df)
 
 df = transform_data_date(df)
+
+basic_eda(df)
+
+
+df = transform_data_eliminated_duplicate(df)
 
 basic_eda(df)
 
