@@ -2,7 +2,7 @@ import pandas as pd
 
 def load_data(file_path):
     """Carga los datos desde un archivo CSV."""
-    df = pd.read_csv(file_path, encoding="latin-1")
+    df = pd.read_csv(file_path, encoding="utf-8")
     return df
 
 def basic_eda(df):
