@@ -13,8 +13,11 @@ file_path ="data/sales_data_sample.csv"
 df = load_data(file_path)
 
 print("Datos cargados exitosamente:")
-transform_data(df)
+df = transform_data(df)
 
+basic_eda(df)
+
+df = transform_data_date(df)
 
 # Init FastAPI
 app = FastAPI(
