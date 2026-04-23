@@ -6,7 +6,7 @@ from datetime import datetime
 
 class ClientsService:
   def __init__(self):
-    self.external_data = {'last_value': none, 'last_update': none}
+    self.external_data = {'last_value': None, 'last_update': None}
     self.url = 'https://randomuser.me/api/?results=100'
     self.csv_path = 'data/clients_dataset.csv'
     self.limit = 3000

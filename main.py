@@ -1,8 +1,9 @@
 from src.services.clients_service import clients_service
 from src.config.connectionPostgres import get_connection
 from src.scripts.eda import load_data
+from src.routes.clients_route import router as clients_router
 
-from src.scripts.transformation import transform_data, transform_data_date,transform_data_eliminated_duplicate
+from src.scripts.transformation import transform_data, transform_data_date,transform_data_eliminated_duplicate,transform_data_products
 
 from src.scripts.eda import basic_eda
 
@@ -15,7 +16,7 @@ print("conexión establecida:", conn)
 download_sales_data()
 
 file_path ="data/sales_data_sample.csv"
-df = load_data(file_path)
+df = load_data(file_path, encoding="latin-1")
 
 print("Datos cargados exitosamente:")
 df = transform_data(df)
@@ -31,6 +32,7 @@ df = transform_data_eliminated_duplicate(df)
 
 basic_eda(df)
 
+transform_data_products(df)
 
 
 
