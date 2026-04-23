@@ -1,7 +1,9 @@
 from src.config.connectionPostgres import get_connection
 from src.scripts.eda import load_data
 
-from src.scripts.transformation import transform_data
+from src.scripts.transformation import transform_data, transform_data_date
+
+from src.scripts.eda import basic_eda
 
 
 from src.utils.downloadKaggle import download_sales_data
@@ -15,9 +17,13 @@ file_path ="data/sales_data_sample.csv"
 df = load_data(file_path)
 
 print("Datos cargados exitosamente:")
-transform_data(df)
+df = transform_data(df)
 
+basic_eda(df)
 
+df = transform_data_date(df)
+
+basic_eda(df)
 
 
 
