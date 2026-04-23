@@ -2,7 +2,8 @@ import pandas as pd
 
 def load_data(file_path):
     """Carga los datos desde un archivo CSV."""
-    return pd.read_csv(file_path)
+    df = pd.read_csv(file_path, encoding="latin-1")
+    return df
 
 def basic_eda(df):
     """Realiza un análisis exploratorio de datos básico."""

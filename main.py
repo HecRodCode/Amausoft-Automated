@@ -7,7 +7,7 @@ conn = get_connection()
 print("conexión establecida:", conn)
 download_sales_data()
 
-file_path = "data/sales_data.csv"
+file_path ="data/sales_data_sample.csv"
 df = load_data(file_path)
 
 print("Datos cargados exitosamente:")   
