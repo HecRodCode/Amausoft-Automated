@@ -35,64 +35,69 @@ class ClientsService:
 
   def _save_to_csv(self, json_data):
     """ Save the current clients data to csv """
-    if not os.path.exists(self.csv_path):
+    try:
+      users = json_data.get('results', [])
+      if not users:
+        return
+      users = json_data.get('results', [])
+      current_id = self._get_current_count()
+      current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+      rows = []
+
+      # Loop for convert JSON data to csv
+      for user in users:
+        rows.append({
+          'client_id': current_id,
+          'name': f"{user['name']['first']} {user['name']['last']}".upper(),
+          "city": user['location']['city'].upper(),
+          "country": user['location']['country'].upper(),
+          "email": user['email'],
+          "fetch_timestamp": current_datetime
+        })
+        current_id += 1
+
+      df_new = pd.DataFrame(rows)
+      file_exists = os.path.isfile(self.csv_path)
+      df_new.to_csv(
+        self.csv_path,
+        mode='a',
+        index=False,
+        header=not file_exists,
+        encoding='utf-8'
+      )
+      print(f"{len(rows)} Saved clients. Current total: {self._get_current_count()}")
+
+    except Exception as e:
+      print(f"Error CSV processing: {e}")
+
+  async def fetch_clients_periodically(self):
+    async with httpx.AsyncClient() as client:
+      while True:
+        current_total = self._get_current_count()
+
+        # Limit check
+        if current_total >= self.limit:
+          print(f"Limit the {self.limit} reached. Ingestion stopped.")
+          break
+
+      # Calculate how many are needed to avoid exceeding 3000
+      remaining = self.limit - current_total
+      fetch_n = min(100, remaining)
+
       try:
-        users = json_data.get('results', [])
-        current_id = self._get_current_count()
-        rows = []
+        params = {"results": fetch_n}
+        response = await client.get(self.url, params=params, timeout=10.0)
 
-        # Loop for convert JSON data to csv
-        for user in users:
-          rows.append({
-            'client_id': current_id,
-            'name': f"{user['name']['first']} {user['name']['last']}".upper(),
-            "city": user['location']['city'].upper(),
-            "country": user['location']['country'].upper(),
-            "email": user['email'],
-            "fetch_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-          })
-          current_id += 1
-
-        df_new = pd.DataFrame(rows)
-        file_exists = os.path.isfile(self.csv_path)
-        df_new.to_csv(
-          self.csv_path,
-          mode='a',
-          index=False,
-          header=not file_exists,
-          encoding='utf-8'
-        )
-        print(f"{len(rows)} Saved clients. Current total: {self._get_current_count()}")
-
+        if response.status_code == 200:
+          data = response.json()
+          self.external_data["last_value"] = data
+          self.external_data["last_update"] = datetime.now().isoformat()
+          self._save_to_csv(data)
+        else:
+          print(f'API status error: {response.status_code}')
       except Exception as e:
-        print(f"Error CSV processing: {e}")
+        print(f"Connection error: {e}")
 
-      async def fetch_clients_periodically(self):
-        async with httpx.AsyncClient() as client:
-          while True:
-            current_total = self._get_current_count()
-
-            # Limit check
-            if current_total >= self.limit:
-              print(f"Limit the {self.limit} reached. Ingestion stopped.")
-              break
-
-            # Calculate how many are needed to avoid exceeding 3000
-            remaining = self.limit - current_total
-            fetch_n = min(100, remaining)
-
-            try:
-              params = {"results": fetch_n}
-              response = await client.get(self.url, params=params, timeout=10.0)
-
-              if response.status_code == 200:
-                data = response.json()
-                self.external_data["last_value"] = data
-                self.external_data["last_update"] = datetime.now().isoformat()
-                self._save_to_csv(data)
-            except Exception as e:
-              print(f"Connection error: {e}")
-
-            await asyncio.sleep(40)
+      await asyncio.sleep(40)
 
 clients_service = ClientsService()
