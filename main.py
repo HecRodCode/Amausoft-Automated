@@ -9,6 +9,7 @@ from src.routes.regions_route import router as regions_router
 # -- Services --
 from src.services.clients_service import clients_service
 from src.services.regions_service import regions_service
+from src.services.carga_datos import cargar_datos
 
 # -- ETL & Utils --
 from src.scripts.transformation import sales_etl
@@ -48,6 +49,7 @@ async def lifespan(app: FastAPI):
 
     if conn: conn.close()
     print('System Shutdown Complete')
+
 
 # Init FastAPI
 app = FastAPI(

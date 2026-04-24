@@ -1,6 +1,7 @@
 import pandas as pd
 
-def load_data(file_path):
+
+def load_data(file_path, encoding="ISO-8859-1"):
     """Carga los datos desde un archivo CSV."""
     df = pd.read_csv(file_path, encoding="ISO-8859-1")
     return df
@@ -19,3 +20,5 @@ def basic_eda(df):
     print("\nValores nulos por columna:")
     print(df.isnull().sum())
 
+    print("\nRepetidos por ORDERNUMBER:")
+    print(df.duplicated(subset=["ORDERNUMBER"]).sum())

@@ -6,6 +6,7 @@ x-airflow-common: &airflow-common
   env_file:
     - .env
   volumes:
+    - ../dags:/opt/airflow/dags
     - airflow_logs:/opt/airflow/logs
     - airflow_config:/opt/airflow/config
     - airflow_plugins:/opt/airflow/plugins

@@ -20,3 +20,6 @@ venv/
 *.csv
 logs/
 *.parquet
+
+#CSV Testing
+data/ 
