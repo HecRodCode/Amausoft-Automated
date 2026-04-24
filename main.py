@@ -9,6 +9,7 @@ from src.routes.regions_route import router as regions_router
 # -- Services --
 from src.services.clients_service import clients_service
 from src.services.regions_service import regions_service
+from src.services.carga_datos import cargar_datos
 
 # -- ETL & Utils --
 from src.config.connectionPostgres import get_connection
@@ -32,6 +33,7 @@ async def lifespan(app: FastAPI):
 
     if df is not None:
         df2 = transform_data_products(df)
+        cargar_datos("data/products.csv", "products", conn)
         df = transform_data(df)
         df= transform_data_eliminated_duplicate(df)
         df = transform_data_date(df)

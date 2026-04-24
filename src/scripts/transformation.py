@@ -2,14 +2,10 @@ import pandas as pd
 
 
 def transform_data(df):
-
     columnas = ["ORDERNUMBER", "ORDERDATE", "PRODUCTCODE", "QUANTITYORDERED", "PRICEEACH", "SALES","COUNTRY"]
     df_filtrado = df[columnas]
-
     df_filtrado.to_csv("data/sales_clean.csv", index=False)
     return df_filtrado
-
-
 
 def transform_data_date(df_filtrado):
     df_filtrado["ORDERDATE"] = pd.to_datetime(df_filtrado["ORDERDATE"], errors="coerce")
@@ -33,7 +29,7 @@ def transform_data_products(df):
             productCodes.append(i["PRODUCTCODE"])
             registro = {
                 "id_product": contador,
-                "productCode": i["PRODUCTCODE"],
+                "product_name": i["PRODUCTCODE"],
                 "category": i["PRODUCTLINE"]
             }
             contador += 1
