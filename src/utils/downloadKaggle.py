@@ -11,7 +11,7 @@ import kaggle
 def download_sales_data(dest_folder="data/"):
 
     if os.path.exists(f"{dest_folder}sales_data_sample.csv"):
-        print(f"El archivo ya existe en {dest_folder}. No se descargará nuevamente.")
+        print(f"[Server] The File already exists {dest_folder}. It won't download again.")
         return
     else:
         kaggle.api.authenticate()
@@ -20,4 +20,4 @@ def download_sales_data(dest_folder="data/"):
             path=dest_folder,
             unzip=True
         )
-        print(f"CSV descargado en {dest_folder}")
+        print(f"[Server] CSV File saved in {dest_folder}")

@@ -51,12 +51,12 @@ class ClientsService:
         encoding='utf-8'
       )
 
-      print(f"{len(rows)} Saved clients. Current total: {self._get_current_count()}")
+      print(f"[Server] {len(rows)} Saved clients. Current total: {self._get_current_count()}")
     except Exception as e:
-      print(f"Error CSV processing: {e}")
+      print(f"[Server] Error CSV processing: {e}")
 
   async def fetch_clients_periodically(self):
-    print("Client Ingestion Service Started.", flush=True)
+    print("[Server] Client Ingestion Service Started.", flush=True)
     async with httpx.AsyncClient() as client:
       while True:
         try:
@@ -64,7 +64,7 @@ class ClientsService:
 
           # Limit check
           if current_total >= self.limit:
-            print(f"Limit the {self.limit} reached. Ingestion stopped.")
+            print(f"[Server] Limit the {self.limit} reached. Ingestion stopped.")
             break
 
           remaining = self.limit - current_total
@@ -77,10 +77,11 @@ class ClientsService:
 
             await asyncio.to_thread(self._save_to_csv, data)
           else:
-            print(f'API Error: {response.status_code}')
+            print(f'[Server] API Error: {response.status_code}')
         except Exception as e:
-          print(f"Connection error: {e}")
+          print(f"[Server] Connection error: {e}")
 
       await asyncio.sleep(20)
 
+# Single instance to use in the main
 clients_service = ClientsService()

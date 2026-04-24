@@ -24,10 +24,10 @@ class RegionsService:
     If 'force' is False, it respects the existing file.
     """
     if not force and self._exists():
-      print(f"Using existing Regions Master in {self.csv_path}")
+      print(f"[Server] Using existing Regions Master in {self.csv_path}")
       return True
 
-    print("Downloading regional data from the API...")
+    print("[Server] Downloading regional data from the API...")
     try:
       async with httpx.AsyncClient() as client:
         response = await client.get(self.url, timeout=20.0, follow_redirects=True)
@@ -51,13 +51,14 @@ class RegionsService:
 
           df = pd.DataFrame(rows)
           df.to_csv(self.csv_path, index=False, encoding='utf-8')
-          print(f"Updated Master of Regions: {len(df)} countries loaded.")
+          print(f"[Server] Updated Master of Regions: {len(df)} countries loaded.")
           return True
         else:
-          print(f"Regions API Error: Code {response.status_code}")
+          print(f"[Server] Regions API Error: Code {response.status_code}")
           return False
     except Exception as e:
-      print(f"Error getting regions: {e}")
+      print(f"[Server] Error getting regions: {e}")
       return False
 
+# Single instance to use in the main
 regions_service = RegionsService()

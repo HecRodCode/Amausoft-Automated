@@ -14,4 +14,4 @@ async def download_csv():
     """Download the accumulated dataset"""
     if os.path.exists(clients_service.csv_path):
         return FileResponse(path=clients_service.csv_path, filename="clients_dataset.csv")
-    return {"error": "File not found"}
+    return {"[Server] error": "File not found"}
