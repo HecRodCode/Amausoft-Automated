@@ -25,19 +25,24 @@ def transform_data_eliminated_duplicate(df_filtrado):
     return df_filtrado
 
 def transform_data_products(df):
-    df_nuevo = (
-        df[["PRODUCTCODE"]]
-        .dropna(subset=["PRODUCTCODE"])
-        .drop_duplicates(subset=["PRODUCTCODE"])
-        .reset_index(drop=True)
-        .rename(columns={"PRODUCTCODE": "product_name"})
-    )
-    df_nuevo.insert(0, "id_product", df_nuevo.index + 1)
-    df_nuevo["category"] = "UNKNOWN"
-
+    nuevo_csv = []
+    productCodes = []
+    contador = 0
+    for i in df.to_dict(orient="records"):
+        if i["PRODUCTCODE"] not in productCodes:
+            productCodes.append(i["PRODUCTCODE"])
+            registro = {
+                "id_product": contador,
+                "productCode": i["PRODUCTCODE"],
+                "category": i["PRODUCTLINE"]
+            }
+            contador += 1
+            nuevo_csv.append(registro)
+        else:
+            contador += 1
+            continue
+    df_nuevo = pd.DataFrame(nuevo_csv)
     df_nuevo.to_csv("data/products.csv", index=False)
-    print("Transformación de productos realizada y guardada en 'data/products.csv'")
-    return df_nuevo
 
 
 

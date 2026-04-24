@@ -19,7 +19,9 @@ file_path ="data/sales_data_sample.csv"
 df = load_data(file_path, encoding="latin-1")
 
 print("Datos cargados exitosamente:")
+df_productos =transform_data_products(df)
 df = transform_data(df)
+
 
 basic_eda(df)
 
@@ -32,7 +34,7 @@ df = transform_data_eliminated_duplicate(df)
 
 basic_eda(df)
 
-transform_data_products(df)
+
 
 
 
