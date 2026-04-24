@@ -1,46 +1,40 @@
 import pandas as pd
+import os
+from src.utils.downloadKaggle import download_sales_data
 
+class SalesETL:
+    def __init__(self, raw_path="data/sales_data_sample.csv", clean_path="data/sales_clean.csv"):
+        self.raw_path = raw_path
+        self.clean_path = clean_path
+        self.columns = ["ORDERNUMBER", "ORDERDATE", "PRODUCTCODE", "QUANTITYORDERED", "PRICEEACH", "SALES", "COUNTRY"]
 
-def transform_data(df):
-    columnas = ["ORDERNUMBER", "ORDERDATE", "PRODUCTCODE", "QUANTITYORDERED", "PRICEEACH", "SALES","COUNTRY"]
-    df_filtrado = df[columnas]
-    df_filtrado.to_csv("data/sales_clean.csv", index=False)
-    return df_filtrado
+    def extract(self):
+        """Downloading and uploading data"""
+        download_sales_data()
+        if not os.path.exists(self.raw_path):
+            raise FileNotFoundError(f"No se encontró el archivo en {self.raw_path}")
+        return pd.read_csv(self.raw_path, encoding="ISO-8859-1")
 
-def transform_data_date(df_filtrado):
-    df_filtrado["ORDERDATE"] = pd.to_datetime(df_filtrado["ORDERDATE"], errors="coerce")
-    df_filtrado["ORDERDATE"] = df_filtrado["ORDERDATE"].dt.normalize()
-    df_filtrado.to_csv("data/sales_clean_date.csv", index=False)
-    print("Transformación de fecha realizada y guardada en 'data/sales_clean_date.csv'")
-    return df_filtrado
+    def transform(self, df):
+        """Cleaning and standardization"""
+        df_final = df[self.columns].copy()
+        df_final["ORDERDATE"] = pd.to_datetime(df_final["ORDERDATE"], errors="coerce").dt.normalize()
+        return df_final
 
-def transform_data_eliminated_duplicate(df_filtrado):
-    df_filtrado = df_filtrado.drop_duplicates(subset=["ORDERNUMBER"])
-    df_filtrado.to_csv("data/sales_clean_no_duplicates.csv", index=False)
-    print("Transformación de eliminación de duplicados realizada y guardada en 'data/sales_clean_no_duplicates.csv'")
-    return df_filtrado
+    def load(self, df):
+        """Data persistence"""
+        os.makedirs(os.path.dirname(self.clean_path), exist_ok=True)
+        df.to_csv(self.clean_path, index=False, encoding='utf-8')
+        return self.clean_path
 
-def transform_data_products(df):
-    nuevo_csv = []
-    productCodes = []
-    contador = 0
-    for i in df.to_dict(orient="records"):
-        if i["PRODUCTCODE"] not in productCodes:
-            productCodes.append(i["PRODUCTCODE"])
-            registro = {
-                "id_product": contador,
-                "product_name": i["PRODUCTCODE"],
-                "category": i["PRODUCTLINE"]
-            }
-            contador += 1
-            nuevo_csv.append(registro)
-        else:
-            contador += 1
-            continue
-    df_nuevo = pd.DataFrame(nuevo_csv)
-    df_nuevo.to_csv("data/products.csv", index=False)
+    def run_pipeline(self):
+        """Execute the entire flow in a controlled manner"""
+        print(f"[ETL] Starting Pipeline...", flush=True)
+        raw_df = self.extract()
+        clean_df = self.transform(raw_df)
+        path = self.load(clean_df)
+        print(f"[ETL] Pipeline finished. File saved in: {path}", flush=True)
+        return clean_df
 
-
-
-
-
+# Single instance to use in the main
+sales_etl = SalesETL()

@@ -12,42 +12,43 @@ from src.services.regions_service import regions_service
 from src.services.carga_datos import cargar_datos
 
 # -- ETL & Utils --
+from src.scripts.transformation import sales_etl
 from src.config.connectionPostgres import get_connection
-from src.scripts.eda import load_data
-from src.scripts.eda import load_data, basic_eda
-from src.scripts.transformation import transform_data, transform_data_date,transform_data_products,transform_data_eliminated_duplicate
 from src.utils.downloadKaggle import download_sales_data
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Init Amausoft Automated API")
+    print("--- Amausoft Automated API: System Boot ---", flush=True)
 
-    # Conexión a DB
-    conn = get_connection()
-    print("Established connection:", conn)
+    # Connection DB
+    conn = None
+    try:
+        conn = get_connection()
+        print(f"DB Connected: {conn}", flush=True)
+    except Exception as e:
+        print(f"DB Connection Failed: {e}", flush=True)
 
-    download_sales_data()
-    file_path = "data/sales_data_sample.csv"
-    df = load_data(file_path)
+    async def master_orchestrator():
+        await asyncio.sleep(1)
 
-    if df is not None:
-        df2 = transform_data_products(df)
-        cargar_datos("data/products.csv", "products", conn)
-        df = transform_data(df)
-        df= transform_data_eliminated_duplicate(df)
-        df = transform_data_date(df)
-        basic_eda(df)
-        
-    # Background Tasks
-    asyncio.create_task(clients_service.fetch_clients_periodically())
-    asyncio.create_task(regions_service.update_regions_dataset())
+        try:
+            await asyncio.to_thread(sales_etl.run_pipeline)
+
+
+            print("ETL Ready. Activating Microservices...", flush=True)
+            asyncio.create_task(clients_service.fetch_clients_periodically())
+            asyncio.create_task(regions_service.update_regions_dataset())
+
+        except Exception as e:
+            print(f"Orchestrator Error: {e}", flush=True)
+
+    asyncio.create_task(master_orchestrator())
 
     yield
 
-    if conn:
-        conn.close()
-    print('Turning off services')
+    if conn: conn.close()
+    print('System Shutdown Complete')
 
 
 # Init FastAPI
