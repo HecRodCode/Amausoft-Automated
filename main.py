@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 # -- Connection Database --
 from src.config.connectionPostgres import get_connection
+from src.database.loader import data_loader
 
 # -- Routes --
 from src.routes.clients_route import router as clients_router
@@ -13,11 +14,6 @@ from src.routes.regions_route import router as regions_router
 from src.services.clients_service import clients_service
 from src.services.regions_service import regions_service
 
-# -- ETL & Utils --
-from src.scripts.transformation import sales_etl
-from src.database.loader import data_loader
-from src.utils.downloadKaggle import download_sales_data
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("--- Amausoft Automated API: System Boot ---", flush=True)
@@ -26,27 +22,18 @@ async def lifespan(app: FastAPI):
     conn = None
     try:
         conn = get_connection()
+        app.state.db_conn = conn
         print(f"[DB] Connected: {conn}", flush=True)
     except Exception as e:
         print(f"[DB] Connection Failed: {e}", flush=True)
 
-    async def master_orchestrator():
-        await asyncio.sleep(1)
+    print("[API] Done. Activating Microservices...", flush=True)
+    
+    print("[API] Running initial regions sync...", flush=True)
+    await regions_service.update_regions_dataset()
 
-        try:
-            await asyncio.to_thread(sales_etl.run_pipeline)
-
-            print("[DB] Loading data to Postgres...", flush=True)
-            await asyncio.to_thread(data_loader.bulk_insert,conn,"data/sales_clean.csv", "sales")
-
-            print("[ETL] Ready. Activating Microservices...", flush=True)
-            asyncio.create_task(clients_service.fetch_clients_periodically())
-            asyncio.create_task(regions_service.update_regions_dataset())
-
-        except Exception as e:
-            print(f"[Server] Orchestrator Error: {e}", flush=True)
-
-    asyncio.create_task(master_orchestrator())
+    print("[API] Activating Periodic Client Ingestion...", flush=True)
+    asyncio.create_task(clients_service.fetch_clients_periodically())
 
     yield
 
