@@ -18,7 +18,7 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__CELERY__BROKER_URL: amqp://${RABBIT_USER}:${RABBIT_PASSWORD}@localhost:5672//
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}
 
 services:
   # --- INFRAESTRUCTURA ---
