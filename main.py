@@ -2,6 +2,10 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
+# -- Connection Database --
+from src.config.connectionPostgres import get_connection
+from src.database.loader import data_loader
+
 # -- Routes --
 from src.routes.clients_route import router as clients_router
 from src.routes.regions_route import router as regions_router
@@ -9,13 +13,6 @@ from src.routes.regions_route import router as regions_router
 # -- Services --
 from src.services.clients_service import clients_service
 from src.services.regions_service import regions_service
-from src.services.carga_datos import cargar_datos
-
-# -- ETL & Utils --
-from src.scripts.transformation import sales_etl
-from src.config.connectionPostgres import get_connection
-from src.utils.downloadKaggle import download_sales_data
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,31 +22,23 @@ async def lifespan(app: FastAPI):
     conn = None
     try:
         conn = get_connection()
-        print(f"DB Connected: {conn}", flush=True)
+        app.state.db_conn = conn
+        print(f"[DB] Connected: {conn}", flush=True)
     except Exception as e:
-        print(f"DB Connection Failed: {e}", flush=True)
+        print(f"[DB] Connection Failed: {e}", flush=True)
 
-    async def master_orchestrator():
-        await asyncio.sleep(1)
+    print("[API] Done. Activating Microservices...", flush=True)
+    
+    print("[API] Running initial regions sync...", flush=True)
+    await regions_service.update_regions_dataset()
 
-        try:
-            await asyncio.to_thread(sales_etl.run_pipeline)
-
-
-            print("ETL Ready. Activating Microservices...", flush=True)
-            asyncio.create_task(clients_service.fetch_clients_periodically())
-            asyncio.create_task(regions_service.update_regions_dataset())
-
-        except Exception as e:
-            print(f"Orchestrator Error: {e}", flush=True)
-
-    asyncio.create_task(master_orchestrator())
+    print("[API] Activating Periodic Client Ingestion...", flush=True)
+    asyncio.create_task(clients_service.fetch_clients_periodically())
 
     yield
 
     if conn: conn.close()
-    print('System Shutdown Complete')
-
+    print('[Server] System Shutdown Complete')
 
 # Init FastAPI
 app = FastAPI(

@@ -7,5 +7,5 @@ router = APIRouter()
 async def update_regions():
     success = await regions_service.update_regions_dataset()
     if success:
-        return {"message": "regions Dataset updated successfully"}
-    return {"error": "The regions dataset could not be updated"}
+        return {"[Server] message": "regions Dataset updated successfully"}
+    return {"[Server] error": "The regions dataset could not be updated"}

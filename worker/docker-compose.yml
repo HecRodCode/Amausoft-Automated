@@ -1,43 +1,38 @@
+version: '3.8'
+
 x-airflow-common: &airflow-common
   build:
     context: ..
-    args:
-      EXTRA_REQUIREMENTS: ${EXTRA_REQUIREMENTS}
+    dockerfile: Dockerfile
   env_file:
     - .env
+  user: "${AIRFLOW_UID:-50000}:0"
   volumes:
     - ../dags:/opt/airflow/dags
+    - ../src:/opt/airflow/src
+    - ../data:/opt/airflow/data
     - airflow_logs:/opt/airflow/logs
-    - airflow_config:/opt/airflow/config
-    - airflow_plugins:/opt/airflow/plugins
-    - ../pipelines:/opt/pipelines
-  user: "${AIRFLOW_UID:-50000}:0"
+  environment:
+    PYTHONPATH: /opt/airflow
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__CELERY__BROKER_URL: amqp://${RABBIT_USER}:${RABBIT_PASSWORD}@${MASTER_IP}:5672//
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${MASTER_IP}:5432/${DB_NAME}
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://${DB_USER}:${DB_PASSWORD}@${MASTER_IP}:5432/${DB_NAME}
 
 services:
   airflow-worker:
     <<: *airflow-common
-    hostname: ${CELERY_HOSTNAME}
-    command: airflow celery worker --autoscale 4,1 -H ${CELERY_HOSTNAME} -q ${QUEUES}
+    command: airflow celery worker --autoscale 4,1
+    restart: always
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "celery --app airflow.providers.celery.executors.celery_executor.app
-            inspect ping -d \"celery@$${HOSTNAME}\" || celery --app
-            airflow.executors.celery_executor.app inspect ping -d
-            \"celery@$${HOSTNAME}\"",
+          "celery --app airflow.providers.celery.executors.celery_executor.app inspect ping"
         ]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
-    mem_limit: 1g
-    environment:
-      DUMB_INIT_SETSID: "0"
-      PYTHONPATH: /opt/pipelines
-    restart: always
 
 volumes:
   airflow_logs:
-  airflow_config:
-  airflow_plugins:
