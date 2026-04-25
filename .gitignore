@@ -1,25 +1,42 @@
 # Python bytecode
 __pycache__/
+**/__pycache__/
+*.py[cod]
 *.pyc
 *.pyo
 *.pyd
+
+# Docker logs
+*.log
 
 # Virtual enviroment
 .venv/
 env/
 venv/
+ENV/
 
 # Variables enviroment
 .env
+master/.env
+worker/.env
 
 # IDE config file
 .idea/
 .vscode/
 
-# Temporal Data
+# Data
+data/*.csv
+data/processed/
 *.csv
+*.db
+*.sqlite3
 logs/
 *.parquet
 
-#CSV Testing
-data/ 
+# Specific system files
+.DS_Store
+.directory
+
+# Build artifacts
+dist/
+build/
