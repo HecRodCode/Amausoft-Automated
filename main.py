@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[DB] Connection Failed: {e}", flush=True)
 
+    print("======================================================")
     print("[API] Starting Kaggle Sync...", flush=True)
     try:
         await asyncio.to_thread(downloadKaggle)
@@ -36,6 +37,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[API] ERROR en Kaggle Sync: {e}", flush=True)
 
+    print("[API] Creating product dataset based in sales_sample", flush=True)
+    try:
+        from src.utils.product_generator import generate_products_dataset
+        await asyncio.to_thread(generate_products_dataset)
+    except Exception as e:
+        print(f"[API] Error generating products: {e}", flush=True)
+
+    print("======================================================")
     print("[API] Done. Activating Microservices...", flush=True)
 
     print("[API] Running initial regions sync...", flush=True)
