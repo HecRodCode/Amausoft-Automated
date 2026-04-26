@@ -14,6 +14,8 @@ from src.routes.regions_route import router as regions_router
 from src.services.clients_service import clients_service
 from src.services.regions_service import regions_service
 
+from src.utils.downloadKaggle import downloadKaggle
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("--- Amausoft Automated API: System Boot ---", flush=True)
@@ -27,8 +29,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[DB] Connection Failed: {e}", flush=True)
 
+    print("[API] Starting Kaggle Sync...", flush=True)
+    try:
+        await asyncio.to_thread(downloadKaggle)
+        print("[API] Kaggle Sync Completed Successfully.", flush=True)
+    except Exception as e:
+        print(f"[API] ERROR en Kaggle Sync: {e}", flush=True)
+
     print("[API] Done. Activating Microservices...", flush=True)
-    
+
     print("[API] Running initial regions sync...", flush=True)
     await regions_service.update_regions_dataset()
 
