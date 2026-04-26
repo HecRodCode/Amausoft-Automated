@@ -64,7 +64,7 @@ class ClientsService:
 
           # Limit check
           if current_total >= self.limit:
-            print(f"[Server] Limit the {self.limit} reached. Ingestion stopped.")
+            print(f"[Server] Limit the {self.limit} reached. Ingestion stopped.", flush=True)
             break
 
           remaining = self.limit - current_total
